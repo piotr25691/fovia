@@ -1,3 +1,12 @@
+# Dependencies required on Arch Linux:
+# sudo pacman -S upx musl kernel-headers-musl git make gcc syslinux dosfstools cpio bc
+#
+# Dependencies required on Ubuntu or Debian:
+# sudo apt install upx musl git make syslinux dosfstools cpio bc
+#
+# sstrip is obtained from https://pts.50.hu/files/sstrip/sstrip-3.0a
+# Warning: The certificate for the site given is expired, if you are uncomfortable, skip it by removing line 51.
+
 .RECIPEPREFIX := $(.RECIPEPREFIX) 
 all: init fetch compile initrd image
 
