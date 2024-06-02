@@ -7,7 +7,7 @@
 # sstrip is obtained from https://pts.50.hu/files/sstrip/sstrip-3.0a
 # Warning: The certificate for the site given has expired, if you're uncomfortable with it, skip it by removing lines 25-26, 59.
 
-.RECIPEPREFIX := $(.RECIPEPREFIX)
+.RECIPEPREFIX := $(.RECIPEPREFIX) 
 
 all:
     make normal || make error
@@ -16,7 +16,7 @@ normal: init fetch compile initrd image
 
 init:
     @rm -rf work
-    @echo "Checking dependencies..."
+    @echo -e "\033[7mChecking dependencies...\033[0m"
 
     @printf "git... "
     @command -v git
@@ -35,24 +35,24 @@ init:
     @printf "bc (a kernel dependency)... "
     @command -v bc
 
-    @echo "Creating work paths..."
+    @echo -e "\033[7mCreating work paths...\033[0m"
     mkdir -pv work work/linux work/busybox work/initrd
 
 fetch:
-    @echo "Fetching sources..."
+    @echo -e "\033[7mFetching sources...\033[0m"
     git clone --depth=1 -b v6.9.3 https://github.com/gregkh/linux work/linux
     git clone --depth=1 -b 1_36_0 https://github.com/mirror/busybox work/busybox
 
 compile:
-    @echo "Compiling sources..."
+    @echo -e "\033[7mCompiling sources...\033[0m"
     cp -v configs/linux/.config work/linux/.config
     cp -v configs/busybox/.config work/busybox/.config
 
-    @echo "Compiling linux..."
+    @echo -e "\033[7mCompiling Linux...\033[0m"
     yes "n" | make -C work/linux oldconfig
     make KCFLAGS="-Oz" KBUILD_BUILD_HOST="fovia" -C work/linux -j$$(nproc) all
 
-    @echo "Compiling busybox..."
+    @echo -e "\033[7mCompiling BusyBox...\033[0m"
     yes "n" | make -C work/busybox oldconfig
     make CC="musl-gcc" -C work/busybox -j$$(nproc) all install
 
@@ -60,7 +60,7 @@ compile:
     upx --ultra-brute work/busybox/_install/bin/busybox
 
 initrd:
-    @echo "Building initrd..."
+    @echo -e "\033[7mBuilding initrd...\033[0m"
     tar -xvzf skeleton.tar.gz -C work/initrd
 
     cp -rv work/busybox/_install/bin work/initrd/bin
@@ -68,7 +68,7 @@ initrd:
     chmod -Rc 755 work/initrd/bin work/initrd/sbin work/initrd/init
 
 image:
-    @echo "Building image..."
+    @echo -e "\033[7mBuilding image...\033[0m"
     dd bs=512 count=5760 if=/dev/zero of=work/fovia.img conv=sparse
     
     mkfs.fat work/fovia.img
@@ -86,5 +86,7 @@ image:
     mv -v work/fovia.img out/fovia.img
 
 error:
-    @printf "I am scared of building any further, because an error occurred.\nMake sure you've installed the dependencies listed and try again.\n"
+    @echo
+    @printf "\033[31mI am scared of building any further, because an error occurred.\nMake sure you've installed the dependencies listed and try again.\n\033[0m"
+    @echo
     @exit 1
