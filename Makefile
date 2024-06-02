@@ -5,27 +5,35 @@
 # sudo apt install upx musl git make syslinux dosfstools cpio bc
 #
 # sstrip is obtained from https://pts.50.hu/files/sstrip/sstrip-3.0a
-# Warning: The certificate for the site given is expired, if you are uncomfortable, skip it by removing line 51.
+# Warning: The certificate for the site given has expired, if you're uncomfortable with it, skip it by removing lines 25-26, 59.
 
-.RECIPEPREFIX := $(.RECIPEPREFIX) 
-all: init fetch compile initrd image
+.RECIPEPREFIX := $(.RECIPEPREFIX)
+
+all:
+    make normal || make error
+
+normal: init fetch compile initrd image
 
 init:
     @rm -rf work
     @echo "Checking dependencies..."
 
     @printf "git... "
-    @command -v git  # https://github.com/git/git
+    @command -v git
     @printf "musl-gcc (gcc)... "
-    @command -v musl-gcc  # https://github.com/kvinwang/musl-gcc
+    @command -v musl-gcc
     @printf "sstrip (from elfkickers)... "
-    @command -v sstrip  # https://pts.50.hu/files/sstrip/sstrip-3.0a
+    @command -v sstrip
     @printf "upx... "
-    @command -v upx  # https://github.com/upx/upx
+    @command -v upx
     @printf "cpio... "
-    @command -v cpio  # https://mirror.lyrahosting.com/gnu/cpio/cpio-latest.tar.bz2
+    @command -v cpio
     @printf "extlinux (from syslinux)... "
-    @command -v extlinux  # https://github.com/geneC/syslinux
+    @command -v extlinux
+    @printf "dosfslabel (from dosfstools)... "
+    @command -v dosfslabel
+    @printf "bc (a kernel dependency)... "
+    @command -v bc
 
     @echo "Creating work paths..."
     mkdir -pv work work/linux work/busybox work/initrd
@@ -76,3 +84,7 @@ image:
     umount -R /mnt
     mkdir -v out
     mv -v work/fovia.img out/fovia.img
+
+error:
+    @printf "I am scared of building any further, because an error occurred.\nMake sure you've installed the dependencies listed and try again.\n"
+    @exit 1
