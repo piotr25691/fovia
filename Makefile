@@ -19,21 +19,21 @@ init:
     @echo -e "\033[7mChecking dependencies...\033[0m"
 
     @printf "git... "
-    @command -v git || echo "not found"; false
+    @command -v git || ( echo "not found"; false )
     @printf "musl-gcc (gcc)... "
-    @command -v musl-gcc || echo "not found"; false
+    @command -v musl-gcc || ( echo "not found"; false )
     @printf "sstrip (from elfkickers)... "
-    @command -v sstrip || echo "not found"; false
+    @command -v sstrip || ( echo "not found"; false )
     @printf "upx... "
-    @command -v upx || echo "not found"; false
+    @command -v upx || ( echo "not found"; false )
     @printf "cpio... "
-    @command -v cpio || echo "not found"; false
+    @command -v cpio || ( echo "not found"; false )
     @printf "extlinux (from syslinux)... "
-    @command -v extlinux || echo "not found"; false
+    @command -v extlinux || ( echo "not found"; false )
     @printf "dosfslabel (from dosfstools)... "
-    @command -v dosfslabel || echo "not found"; false
+    @command -v dosfslabel || ( echo "not found"; false )
     @printf "bc (a kernel dependency)... "
-    @command -v bc || echo "not found"; false
+    @command -v bc || ( echo "not found"; false )
 
     @echo -e "\033[7mCreating work paths...\033[0m"
     mkdir -pv work work/linux work/busybox work/initrd
