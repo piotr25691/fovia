@@ -2,41 +2,33 @@
 # sudo pacman -S upx musl kernel-headers-musl git make gcc syslinux dosfstools cpio bc
 #
 # Dependencies required on Ubuntu or Debian:
-# sudo apt install upx musl git make syslinux dosfstools cpio bc
+# sudo apt install upx musl musl-tools git make syslinux dosfstools cpio bc
 #
 # sstrip is obtained from https://pts.50.hu/files/sstrip/sstrip-3.0a
 # Warning: The certificate for the site given has expired, if you're uncomfortable with it, skip it by removing lines 25-26, 59.
 
+.PHONY: all full clean init fetch compile initrd image error
 .RECIPEPREFIX := $(.RECIPEPREFIX) 
+THREADS := $(shell nproc)
 
 all:
-    make normal || make error
+    $(MAKE) full || make error
 
-normal: init fetch compile initrd image
+full: clean init fetch compile initrd image
+
+clean:
+    @rm -rf work
 
 init:
-    @rm -rf work
     @echo -e "\033[7mChecking dependencies...\033[0m"
 
-    @printf "git... "
-    @command -v git || ( echo "not found"; false )
-    @printf "musl-gcc (gcc)... "
-    @command -v musl-gcc || ( echo "not found"; false )
-    @printf "sstrip (from elfkickers)... "
-    @command -v sstrip || ( echo "not found"; false )
-    @printf "upx... "
-    @command -v upx || ( echo "not found"; false )
-    @printf "cpio... "
-    @command -v cpio || ( echo "not found"; false )
-    @printf "extlinux (from syslinux)... "
-    @command -v extlinux || ( echo "not found"; false )
-    @printf "dosfslabel (from dosfstools)... "
-    @command -v dosfslabel || ( echo "not found"; false )
-    @printf "bc (a kernel dependency)... "
-    @command -v bc || ( echo "not found"; false )
+    @for dependency in git musl-gcc sstrip upx cpio extlinux dosfslabel bc; do \
+        printf "$$dependency... "; \
+        command -v $$dependency || ( echo "not found"; false ); \
+    done
 
     @echo -e "\033[7mCreating work paths...\033[0m"
-    mkdir -pv work work/linux work/busybox work/initrd
+    mkdir -pv work
 
 fetch:
     @echo -e "\033[7mFetching sources...\033[0m"
@@ -49,12 +41,13 @@ compile:
     cp -v configs/busybox/.config work/busybox/.config
 
     @echo -e "\033[7mCompiling Linux...\033[0m"
-    yes "n" | make -C work/linux oldconfig
-    make KCFLAGS="-Oz" KBUILD_BUILD_HOST="fovia" -C work/linux -j$$(nproc) all
+    $(MAKE) -C work/linux oldconfig
+    $(MAKE) KCFLAGS="-Oz" KBUILD_BUILD_HOST="fovia" -C work/linux -j$(THREADS) all
 
     @echo -e "\033[7mCompiling BusyBox...\033[0m"
-    yes "n" | make -C work/busybox oldconfig
-    make CC="musl-gcc" -C work/busybox -j$$(nproc) all install
+    $(MAKE) -C work/busybox oldconfig
+    $(MAKE) CC="musl-gcc" -C work/busybox -j$(THREADS) all
+    $(MAKE) CC="musl-gcc" -C work/busybox -j$(THREADS) all install
 
     sstrip work/busybox/_install/bin/busybox
     upx --ultra-brute work/busybox/_install/bin/busybox
@@ -80,6 +73,8 @@ image:
     ( cd work/initrd; find . | cpio -oH newc | xz -9 --check=crc32 > /mnt/initrd )
     cp -v work/linux/arch/x86/boot/bzImage /mnt/vmlinuz
     printf "default fovia\n\nlabel fovia\nlinux /vmlinuz\ninitrd /initrd\n\ntimeout 1" > /mnt/syslinux.cfg
+    # uncomment for serial output
+    # printf "default fovia\n\nlabel fovia\nlinux /vmlinuz\ninitrd /initrd\nappend console=ttyS0\n\ntimeout 1" > /mnt/syslinux.cfg
 
     umount -R /mnt
     mkdir -v out
@@ -87,6 +82,6 @@ image:
 
 error:
     @echo
-    @printf "\033[31mI am scared of building any further, because an error occurred.\nMake sure you've installed the dependencies listed and try again.\n\033[0m"
+    @printf "\033[31mI am scared of building any further, because an error occurred.\nCheck the above error output.\nMake sure you've installed the dependencies listed and try again.\n\033[0m"
     @echo
-    @exit 1
+    @false
