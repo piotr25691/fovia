@@ -2,7 +2,7 @@
 This is a fully standalone Linux distribution made to boot from an ED (Extended Density) floppy disk.
 
 ## How?
-I have found out the strats and ways to slim down BusyBox and the Linux kernel, then pack everything with XZ into a floppy disk. It can allow 64-bot distributions to fit in one disk.
+I have found out the strats and ways to slim down BusyBox and the Linux kernel, then pack everything with XZ into a floppy disk. It can allow 64-bit distributions to fit in one disk.
 
 <sub><sup>The strats are defined [here](http://ptspts.blogspot.com/2013/12/how-to-make-smaller-c-and-c-binaries.html?m=1).</sub></sup>
 
