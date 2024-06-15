@@ -21,7 +21,7 @@ clean:
 init:
     @echo -e "\033[7mChecking dependencies...\033[0m"
 
-    for dependency in git musl-gcc sstrip upx cpio syslinux mkisofs bc; do \
+    for dependency in git musl-gcc sstrip upx cpio syslinux xorrisofs bc; do \
        printf "$$dependency... "; \
        command -v $$dependency || ( echo "not found"; false ); \
     done
@@ -55,7 +55,7 @@ compile:
     
     sstrip work/busybox/_install/bin/busybox
     upx --ultra-brute work/busybox/_install/bin/busybox
-
+    
 # create initrd fs
 initrd:
     @echo -e "\033[7mBuilding initrd...\033[0m"
@@ -64,14 +64,16 @@ initrd:
 
     cp -rv work/busybox/_install/bin work/initrd/bin
     cp -rv work/busybox/_install/sbin work/initrd/sbin
-
+    
     cp -rv rootfs.tar.xz work/initrd/var/rootfs.tar.xz
 
     # comment to skip modules, might break some features
     $(MAKE) INSTALL_MOD_PATH=../initrd -C work/linux modules_install
 
     chmod -Rc 755 work/initrd/bin work/initrd/sbin work/initrd/init
-
+    find work/initrd | xargs touch --date=@0
+    touch --date=@0 work/linux/arch/x86/boot/bzImage
+        
 # verify all files
 verify:
     @echo -e "\033[7mVerifying files...\033[0m"
@@ -83,15 +85,17 @@ verify:
 image:
     @echo -e "\033[7mBuilding image...\033[0m"
     @rm -rvf work/iso && mkdir -pv work/iso work/iso/boot work/iso/isolinux
+        
+    ( cd work/initrd; find . | cpio --reproducible -oH newc | xz -9 --check=crc32 > ../iso/boot/initrd )
     
-    ( cd work/initrd; find . | cpio -oH newc | xz -9 --check=crc32 > ../iso/boot/initrd )
-    @cp -v work/linux/arch/x86/boot/bzImage work/iso/boot/vmlinuz
+    @cp -pv work/linux/arch/x86/boot/bzImage work/iso/boot/vmlinuz
 
-    @cp -v /usr/lib/syslinux/bios/isolinux.bin work/iso/isolinux
-    @cp -v /usr/lib/syslinux/bios/ldlinux.c32 work/iso/isolinux
-    printf "default fovia\n\nlabel fovia\nlinux /boot/vmlinuz\ninitrd /boot/initrd\nappend rw panic=10\n\ntimeout 1" > work/iso/isolinux/syslinux.cfg
+    @cp -pv /usr/lib/syslinux/bios/isolinux.bin work/iso/isolinux
+    @cp -pv /usr/lib/syslinux/bios/ldlinux.c32 work/iso/isolinux
+    printf "default fovia\n\nlabel fovia\nlinux /boot/vmlinuz\ninitrd /boot/initrd\nappend rw panic=10\n\ntimeout 1" > work/iso/isolinux/isolinux.cfg
 
-    mkisofs -V FOVIA_BOOTSTRAPPER -o work/fovia.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table work/iso
+    find work/iso | xargs touch --date=@0
+    SOURCE_DATE_EPOCH=0 xorrisofs -U -V FOVIA_BOOTSTRAPPER -o work/fovia.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table work/iso
 
     @mkdir -pv out
     @mv -v work/fovia.iso out/fovia.iso
