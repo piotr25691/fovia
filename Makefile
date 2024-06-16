@@ -44,6 +44,7 @@ compile:
     @echo -e "\033[7mCompiling Linux...\033[0m"
     $(MAKE) -C work/linux oldconfig
     $(MAKE) KCFLAGS="-Oz -pipe" KBUILD_BUILD_HOST="fovia" -C work/linux -j$(THREADS) all
+    find work/linux -name "*.ko" | xargs strip --strip-unneeded
 
     @echo -e "\033[7mCompiling BusyBox...\033[0m"
     ( cp patches/busybox.patch work/busybox && cd work/busybox && patch -Nup1 -i busybox.patch )
@@ -68,7 +69,7 @@ initrd:
     cp -rv rootfs.tar.xz work/initrd/var/rootfs.tar.xz
 
     # comment to skip modules, might break some features
-    $(MAKE) INSTALL_MOD_PATH=../initrd -C work/linux modules_install
+    $(MAKE) INSTALL_MOD_STRIP=1 INSTALL_MOD_PATH=../initrd -C work/linux modules_install
 
     chmod -Rc 755 work/initrd/bin work/initrd/sbin work/initrd/init
     find work/initrd | xargs touch --date=@0
