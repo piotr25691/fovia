@@ -21,7 +21,7 @@ clean:
 init:
     @echo -e "\033[7mChecking dependencies...\033[0m"
 
-    for dependency in git musl-gcc sstrip upx cpio syslinux xorrisofs bc; do \
+    for dependency in git musl-gcc sstrip upx cpio syslinux xorrisofs bc pahole; do \
        printf "$$dependency... "; \
        command -v $$dependency || ( echo "not found"; false ); \
     done
