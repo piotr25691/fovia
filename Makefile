@@ -93,7 +93,7 @@ image:
 
     @cp -pv /usr/lib/syslinux/bios/isolinux.bin work/iso/isolinux
     @cp -pv /usr/lib/syslinux/bios/ldlinux.c32 work/iso/isolinux
-    printf "default fovia\n\nlabel fovia\nlinux /boot/vmlinuz\ninitrd /boot/initrd\nappend rw panic=10\n\ntimeout 1" > work/iso/isolinux/isolinux.cfg
+    printf "default fovia\n\nlabel fovia\nlinux /boot/vmlinuz\ninitrd /boot/initrd\nappend rw quiet panic=10\n\ntimeout 1" > work/iso/isolinux/isolinux.cfg
 
     find work/iso | xargs touch --date=@0
     SOURCE_DATE_EPOCH=0 xorrisofs -U -V FOVIA_BOOTSTRAPPER -o work/fovia.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table work/iso
