@@ -1,11 +1,11 @@
 # Dependencies required on Arch Linux:
-# sudo pacman -S upx musl kernel-headers-musl git make gcc syslinux dosfstools cpio bc
+# sudo pacman -S upx musl kernel-headers-musl git make gcc syslinux dosfstools cpio bc pahole
 #
 # Dependencies required on Ubuntu or Debian:
-# sudo apt install upx musl musl-tools git make syslinux dosfstools cpio bc
+# sudo apt install upx musl musl-tools git make syslinux dosfstools cpio bc pahole
 #
 # sstrip is obtained from https://pts.50.hu/files/sstrip/sstrip-3.0a
-# Warning: The certificate for the site given has expired, if you're uncomfortable with it, skip it by removing lines 25-26, 59.
+# Warning: The certificate for the site given has expired, if you're uncomfortable with it, skip it by editing related lines.
 
 .PHONY: all full clean init fetch compile initrd image error
 .RECIPEPREFIX := $(.RECIPEPREFIX) 
@@ -22,7 +22,7 @@ clean:
 init:
     @echo -e "\033[7mChecking dependencies...\033[0m"
 
-    @for dependency in git musl-gcc sstrip upx cpio extlinux dosfslabel bc; do \
+    @for dependency in git musl-gcc sstrip upx cpio extlinux dosfslabel bc pahole; do \
         printf "$$dependency... "; \
         command -v $$dependency || ( echo "not found"; false ); \
     done
