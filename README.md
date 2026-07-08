@@ -9,10 +9,12 @@ I have found out the strats and ways to slim down BusyBox and the Linux kernel, 
 ## Why?
 It is a fun project, but doesn't serve much purpose, as feature support is extremely limited.
 
-<sub><sup>Even [NanoArch](https://github.com/piotr25691/nanoarch) is more functional at this point.</sub></sup>
+<sub><sup>Even [NanoArch](https://github.com/celunah/nanoarch) is more functional at this point.</sub></sup>
 
 ## Name?
-The project name is derived from the Greek word "φοβία" (fovía), which is a member of the same family of projects started under https://i.lunah.online, the Phobic image host.
+The project name is derived from the Greek word "φοβία" (fovía), which is a member of the same family of projects started under https://i.lunah.online.
+
+The original project no longer exists under this URL. I planned to move it to https://i.lunah.site/, but ultimately did not.
 
 ## Logo?
-I'm still branding this, you'll see this later.
+No logos to see here, yet.
